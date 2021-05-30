@@ -21,6 +21,10 @@ export class DownloadCommand extends BaseCommand {
         host: IMAP_HOSTNAME,
         port: IMAP_PORT,
         tls: true,
+        tlsOptions: {
+          // https://github.com/mscdex/node-imap/issues/705#issuecomment-391419426
+          rejectUnauthorized: false,
+        },
         authTimeout: 3000,
       }
     };
