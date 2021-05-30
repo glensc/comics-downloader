@@ -12,4 +12,8 @@ export class FileSystem {
   public mkdir(path: string): void {
     fs.mkdirSync(path);
   }
+
+  public touch(path: string, date: Date): void {
+    fs.utimesSync(path, date, date);
+  }
 }
