@@ -1,3 +1,4 @@
+import path from "path";
 import imaps, { ImapSimple } from "imap-simple";
 import { parse as parseHtml } from "node-html-parser";
 import { BaseCommand } from "./BaseCommand";
@@ -167,6 +168,13 @@ export class DownloadCommand extends BaseCommand {
         parts.push(part);
       }
       filename = parts.join("_");
+    }
+
+    // fallback for hard cut
+    if (filename.length > maxLength) {
+      const name = path.basename(filename);
+      const extension = path.extname(filename) || '.jpg';
+      filename = name.substring(0, maxLength) + extension;
     }
 
     return filename;
