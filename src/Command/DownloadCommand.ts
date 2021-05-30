@@ -147,8 +147,8 @@ export class DownloadCommand extends BaseCommand {
     // Shorten
     filename = filename.replace("Cyanide and Happiness, a daily webcomic", "Cyanide and Happiness");
 
-    // Spaces to underscores
-    filename = filename.replace(/\s+/g, '_');
+    // Spaces, Slashes to underscores
+    filename = filename.replace(/[\s\/]+/g, '_');
 
     if (filename.length > maxLength) {
       let length = 0;
