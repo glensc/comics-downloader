@@ -13,10 +13,9 @@ export class DownloadCommand extends BaseCommand {
 
   protected async execute(folder: string): Promise<void> {
     const connection = await this.getConnection();
-    await connection.openBox(folder);
 
     const fs = new FileSystem();
-    for await (const attachment of this.getAttachments(connection)) {
+    for await (const attachment of this.getAttachments(connection, folder)) {
       if (fs.exists(attachment.filename)) {
         console.log(`Skipping existing file: ${attachment.filename}`);
         continue;
@@ -29,7 +28,9 @@ export class DownloadCommand extends BaseCommand {
     connection.end();
   }
 
-  private async* getAttachments(connection: ImapSimple) {
+  private async* getAttachments(connection: ImapSimple, folder: string) {
+    await connection.openBox(folder);
+
     const messages: any = await this.findMessages(connection);
     for (const message of messages) {
       const subject = message.parts[0].body.subject;
@@ -50,6 +51,8 @@ export class DownloadCommand extends BaseCommand {
         };
       }
     }
+
+    await connection.closeBox(false);
   }
 
   private async findMessages(connection: ImapSimple) {
