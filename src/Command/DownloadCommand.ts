@@ -144,6 +144,9 @@ export class DownloadCommand extends BaseCommand {
       filename = filename.replace(`M\u{FFFD}rakarud`, "Mürakarud");
     }
 
+    // Shorten
+    filename = filename.replace("Cyanide and Happiness, a daily webcomic", "Cyanide and Happiness");
+
     // Spaces to underscores
     filename = filename.replace(/\s+/g, '_');
 
