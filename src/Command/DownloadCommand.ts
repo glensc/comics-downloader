@@ -25,6 +25,8 @@ export class DownloadCommand extends BaseCommand {
       console.log(attachment);
       fs.writeFile(attachment.filename, await attachment.getData());
     }
+
+    connection.end();
   }
 
   private async* getAttachments(connection: ImapSimple) {
