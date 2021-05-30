@@ -88,6 +88,6 @@ export class DownloadCommand extends BaseCommand {
   private formatDate(d: Date) {
     const pad = (num: number) => `${num < 10 ? "0" : ""}${num}`;
 
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return `${d.getFullYear()}/${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
 }
