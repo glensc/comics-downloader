@@ -46,7 +46,7 @@ export class DownloadCommand extends BaseCommand {
       const messagePath = this.formatDate(message.attributes.date);
       for (const part of imageParts) {
         const cid = part.id.replace(/[<>]/g, '');
-        const filename = `${cids[cid].alt}_${part.params.name}`;
+        const filename = this.translit(`${cids[cid].alt}_${part.params.name}`);
         yield {
           filename: `${messagePath}_${cid}_${filename}`,
           date: message.attributes.date,
@@ -132,6 +132,18 @@ export class DownloadCommand extends BaseCommand {
     };
 
     return await imaps.connect(config);
+  }
+
+  private translit(filename: string) {
+    if (filename.match("\u{FFFD}")) {
+      // Replace some well known Unicode Replacement character placements (0xEF 0xBF 0xBD)
+      filename = filename.replace(`M\u{FFFD}rakarud`, "Mürakarud");
+    }
+
+    // Spaces to underscores
+    filename = filename.replace(/\s+/g, '_');
+
+    return filename;
   }
 
   private formatDate(d: Date) {
