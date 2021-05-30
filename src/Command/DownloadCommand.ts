@@ -17,8 +17,13 @@ export class DownloadCommand extends BaseCommand {
 
     const fs = new FileSystem();
     for await (const attachment of this.getAttachments(connection)) {
+      if (fs.exists(attachment.filename)) {
+        console.log(`Skipping existing file: ${attachment.filename}`);
+        continue;
+      }
+
       console.log(attachment);
-      fs.writeFile(attachment.filename, attachment.data);
+      fs.writeFile(attachment.filename, await attachment.getData());
     }
   }
 
@@ -32,12 +37,10 @@ export class DownloadCommand extends BaseCommand {
       });
 
       for (const part of imageParts) {
-        const partData = await connection.getPartData(message, part);
-
         yield {
           filename: `${messagePath}_${part.id.replace(/[<>]/g, '')}_${part.params.name}`,
           size: part.size,
-          data: partData,
+          getData: () => connection.getPartData(message, part),
         };
       }
     }
