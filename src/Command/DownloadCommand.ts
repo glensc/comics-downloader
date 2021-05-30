@@ -46,6 +46,7 @@ export class DownloadCommand extends BaseCommand {
       for (const part of imageParts) {
         yield {
           filename: `${messagePath}_${part.id.replace(/[<>]/g, '')}_${part.params.name}`,
+          date: message.attributes.date,
           size: part.size,
           getData: () => connection.getPartData(message, part),
         };
