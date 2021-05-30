@@ -46,7 +46,11 @@ export class DownloadCommand extends BaseCommand {
       const messagePath = this.formatDate(message.attributes.date);
       for (const part of imageParts) {
         const cid = part.id.replace(/[<>]/g, '');
-        const filename = this.translit(`${cids[cid].alt}_${part.params.name}`);
+        let filename = part.params.name;
+        if (cids[cid].alt) {
+          let alt = this.translit(cids[cid].alt);
+          filename = `${alt}_${filename}`;
+        }
         yield {
           filename: `${messagePath}_${cid}_${filename}`,
           date: message.attributes.date,
