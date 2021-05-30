@@ -30,11 +30,15 @@ export class DownloadCommand extends BaseCommand {
   private async* getAttachments(connection: ImapSimple) {
     const messages: any = await this.findMessages(connection);
     for (const message of messages) {
+      const subject = message.parts[0].body.subject;
+      const date = message.parts[0].body.date;
+      console.log(`Processing ${date}: ${subject}`);
       const messagePath = this.formatDate(message.attributes.date);
       const parts = imaps.getParts(message.attributes.struct);
       const imageParts = parts.filter(part => {
         return part.type.toLowerCase() === 'image';
       });
+      console.log(`- ${imageParts.length} images`);
 
       for (const part of imageParts) {
         yield {
