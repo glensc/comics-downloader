@@ -8,4 +8,8 @@ export class FileSystem {
   public writeFile(path: string, content: string): void {
     fs.writeFileSync(path, content, "utf8");
   }
+
+  public mkdir(path: string): void {
+    fs.mkdirSync(path);
+  }
 }
