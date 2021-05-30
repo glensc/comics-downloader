@@ -1,5 +1,10 @@
 {
   "name": "comics-downloader",
   "author": "Elan Ruusamäe <glen@pld-linux.org>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "typescript": "^4.3.2"
+  }
 }
