@@ -1,6 +1,7 @@
 import imaps, { ImapSimple } from "imap-simple";
 import { BaseCommand } from "./BaseCommand";
 import { IMAP_HOSTNAME, IMAP_PASSWORD, IMAP_PORT, IMAP_USERNAME } from "../config";
+import { FileSystem } from "../FileSystem";
 
 export class DownloadCommand extends BaseCommand {
   protected configure() {
@@ -14,8 +15,10 @@ export class DownloadCommand extends BaseCommand {
     const connection = await this.getConnection();
     await connection.openBox(folder);
 
+    const fs = new FileSystem();
     for await (const attachment of this.getAttachments(connection)) {
       console.log(attachment);
+      fs.writeFile(attachment.filename, attachment.data);
     }
   }
 
