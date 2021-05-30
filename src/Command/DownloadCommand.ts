@@ -37,13 +37,11 @@ export class DownloadCommand extends BaseCommand {
       const subject = message.parts[0].body.subject;
       const date = message.parts[0].body.date;
       console.log(`Processing ${date}: ${subject}`);
-      const messagePath = this.formatDate(message.attributes.date);
       const parts = imaps.getParts(message.attributes.struct);
-      const imageParts = parts.filter(part => {
-        return part.type.toLowerCase() === 'image';
-      });
+      const imageParts = this.getImageParts(parts);
       console.log(`- ${imageParts.length} images`);
 
+      const messagePath = this.formatDate(message.attributes.date);
       for (const part of imageParts) {
         yield {
           filename: `${messagePath}_${part.id.replace(/[<>]/g, '')}_${part.params.name}`,
@@ -55,6 +53,13 @@ export class DownloadCommand extends BaseCommand {
     }
 
     await connection.closeBox(false);
+  }
+
+  private getImageParts(parts: any[]) {
+    return parts
+      .filter(part => {
+        return part.type.toLowerCase() === 'image';
+      });
   }
 
   private async findMessages(connection: ImapSimple) {
