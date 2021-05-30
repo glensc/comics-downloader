@@ -47,6 +47,12 @@ export class DownloadCommand extends BaseCommand {
       for (const part of imageParts) {
         const cid = part.id.replace(/[<>]/g, '');
         let filename = part.params.name;
+        // skip name parameter if it's like url
+        // but extract proper file extension at least
+        if (filename.match(/^https?:/)) {
+          filename = `.${part.subtype}`;
+        }
+
         if (cids[cid] && cids[cid].alt) {
           const alt = this.translit(cids[cid].alt);
           filename = `${alt}_${filename}`;
