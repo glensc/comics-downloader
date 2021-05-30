@@ -138,7 +138,7 @@ export class DownloadCommand extends BaseCommand {
     return await imaps.connect(config);
   }
 
-  private translit(filename: string) {
+  private translit(filename: string, maxLength = 150) {
     if (filename.match("\u{FFFD}")) {
       // Replace some well known Unicode Replacement character placements (0xEF 0xBF 0xBD)
       filename = filename.replace(`M\u{FFFD}rakarud`, "Mürakarud");
@@ -146,6 +146,19 @@ export class DownloadCommand extends BaseCommand {
 
     // Spaces to underscores
     filename = filename.replace(/\s+/g, '_');
+
+    if (filename.length > maxLength) {
+      let length = 0;
+      const parts = [];
+      for (const part of filename.split(/_+/)) {
+        length += part.length + 1;
+        if (length > maxLength) {
+          break;
+        }
+        parts.push(part);
+      }
+      filename = parts.join("_");
+    }
 
     return filename;
   }
