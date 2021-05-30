@@ -1,4 +1,5 @@
 import imaps, { ImapSimple } from "imap-simple";
+import { parse as parseHtml } from "node-html-parser";
 import { BaseCommand } from "./BaseCommand";
 import { IMAP_HOSTNAME, IMAP_PASSWORD, IMAP_PORT, IMAP_USERNAME } from "../config";
 import { FileSystem } from "../FileSystem";
@@ -38,13 +39,16 @@ export class DownloadCommand extends BaseCommand {
       const date = message.parts[0].body.date;
       console.log(`Processing ${date}: ${subject}`);
       const parts = imaps.getParts(message.attributes.struct);
+      const cids = await this.getContentIds(connection, message, parts);
       const imageParts = this.getImageParts(parts);
       console.log(`- ${imageParts.length} images`);
 
       const messagePath = this.formatDate(message.attributes.date);
       for (const part of imageParts) {
+        const cid = part.id.replace(/[<>]/g, '');
+        const filename = `${cids[cid].alt}_${part.params.name}`;
         yield {
-          filename: `${messagePath}_${part.id.replace(/[<>]/g, '')}_${part.params.name}`,
+          filename: `${messagePath}_${cid}_${filename}`,
           date: message.attributes.date,
           size: part.size,
           getData: () => connection.getPartData(message, part),
@@ -53,6 +57,41 @@ export class DownloadCommand extends BaseCommand {
     }
 
     await connection.closeBox(false);
+  }
+
+  private async getContentIds(connection: ImapSimple, message: any, parts: any[]) {
+    const part = this.getHtmlPart(parts);
+    const html = await connection.getPartData(message, part);
+
+    const root = parseHtml(html);
+    const images = root.querySelectorAll('img');
+
+    const ids: any = {};
+    for (const image of images) {
+      const src = image.getAttribute("src");
+      const alt = image.getAttribute("alt");
+      const cid = (src || "").replace(/^cid:/, "");
+
+      ids[cid] = {
+        src,
+        alt,
+      };
+    }
+
+    return ids;
+  }
+
+  private getHtmlPart(parts: any[]) {
+    const [part] = parts
+      .filter(part => {
+        return part.type.toLowerCase() === 'text' && part.subtype.toLowerCase() === 'html';
+      });
+
+    if (!part) {
+      throw new Error("Missing html part");
+    }
+
+    return part;
   }
 
   private getImageParts(parts: any[]) {
