@@ -1,4 +1,4 @@
-import imaps from "imap-simple";
+import imaps, { ImapSimple } from "imap-simple";
 import { BaseCommand } from "./BaseCommand";
 import { IMAP_HOSTNAME, IMAP_PASSWORD, IMAP_PORT, IMAP_USERNAME } from "../config";
 
@@ -6,11 +6,50 @@ export class DownloadCommand extends BaseCommand {
   protected configure() {
     this
       .name("download")
+      .arguments("<folder>")
       .description("Download emails to local directory")
   }
 
-  protected async execute(): Promise<void> {
+  protected async execute(folder: string): Promise<void> {
     const connection = await this.getConnection();
+    await connection.openBox(folder);
+
+    for await (const attachment of this.getAttachments(connection)) {
+      console.log(attachment);
+    }
+  }
+
+  private async* getAttachments(connection: ImapSimple) {
+    const messages: any = await this.findMessages(connection);
+    for (const message of messages) {
+      const parts = imaps.getParts(message.attributes.struct);
+      const imageParts = parts.filter(part => {
+        return part.type.toLowerCase() === 'image';
+      });
+
+      for (const part of imageParts) {
+        const partData = await connection.getPartData(message, part);
+
+        yield {
+          size: part.size,
+          data: partData,
+        };
+      }
+    }
+  }
+
+  private async findMessages(connection: ImapSimple) {
+    const searchCriteria = [
+      "ALL",
+    ];
+
+    const fetchOptions = {
+      bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE MESSAGE-ID)'],
+      struct: true,
+      markSeen: false,
+    };
+
+    return connection.search(searchCriteria, fetchOptions);
   }
 
   private async getConnection() {
