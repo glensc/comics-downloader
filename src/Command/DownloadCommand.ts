@@ -171,7 +171,10 @@ export class DownloadCommand extends BaseCommand {
         }
         parts.push(part);
       }
-      filename = parts.join("_");
+
+      if (parts.length) {
+        filename = parts.join("_");
+      }
     }
 
     // fallback for hard cut
