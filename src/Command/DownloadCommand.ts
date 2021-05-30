@@ -47,8 +47,8 @@ export class DownloadCommand extends BaseCommand {
       for (const part of imageParts) {
         const cid = part.id.replace(/[<>]/g, '');
         let filename = part.params.name;
-        if (cids[cid].alt) {
-          let alt = this.translit(cids[cid].alt);
+        if (cids[cid] && cids[cid].alt) {
+          const alt = this.translit(cids[cid].alt);
           filename = `${alt}_${filename}`;
         }
         yield {
