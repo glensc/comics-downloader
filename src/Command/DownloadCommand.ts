@@ -22,6 +22,7 @@ export class DownloadCommand extends BaseCommand {
   private async* getAttachments(connection: ImapSimple) {
     const messages: any = await this.findMessages(connection);
     for (const message of messages) {
+      const messagePath = this.formatDate(message.attributes.date);
       const parts = imaps.getParts(message.attributes.struct);
       const imageParts = parts.filter(part => {
         return part.type.toLowerCase() === 'image';
@@ -31,6 +32,7 @@ export class DownloadCommand extends BaseCommand {
         const partData = await connection.getPartData(message, part);
 
         yield {
+          filename: `${messagePath}_${part.id.replace(/[<>]/g, '')}_${part.params.name}`,
           size: part.size,
           data: partData,
         };
@@ -69,5 +71,11 @@ export class DownloadCommand extends BaseCommand {
     };
 
     return await imaps.connect(config);
+  }
+
+  private formatDate(d: Date) {
+    const pad = (num: number) => `${num < 10 ? "0" : ""}${num}`;
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
 }
