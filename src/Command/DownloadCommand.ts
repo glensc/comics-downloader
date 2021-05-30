@@ -23,6 +23,7 @@ export class DownloadCommand extends BaseCommand {
 
       console.log(attachment);
       fs.writeFile(attachment.filename, await attachment.getData());
+      fs.touch(attachment.filename, attachment.date);
     }
 
     connection.end();
