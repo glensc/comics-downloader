@@ -44,7 +44,7 @@ export class DownloadCommand extends BaseCommand {
       const imageParts = this.getImageParts(parts);
       console.log(`- ${imageParts.length} images`);
 
-      const messagePath = this.formatDate(message.attributes.date);
+      const messagePath = `comics/${this.formatDate(message.attributes.date)}`;
       for (const part of imageParts) {
         const cid = part.id.replace(/[<>]/g, '');
         let filename;
