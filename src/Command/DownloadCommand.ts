@@ -1,5 +1,5 @@
 import path from "path";
-import imaps, { ImapSimple } from "imap-simple";
+import imaps, { ImapSimple, Message } from "imap-simple";
 import { parse as parseHtml } from "node-html-parser";
 import { BaseCommand } from "./BaseCommand";
 import { IMAP_HOSTNAME, IMAP_PASSWORD, IMAP_PORT, IMAP_USERNAME } from "../config";
@@ -34,11 +34,14 @@ export class DownloadCommand extends BaseCommand {
   private async* getAttachments(connection: ImapSimple, folder: string) {
     await connection.openBox(folder);
 
-    const messages: any = await this.findMessages(connection);
+    const messages = await this.findMessages(connection);
     for (const message of messages) {
       const subject = message.parts[0].body.subject;
       const date = message.parts[0].body.date;
       console.log(`Processing ${date}: ${subject}`);
+      if (!message.attributes.struct) {
+        throw new Error("Missing required message.attributes.struct");
+      }
       const parts = imaps.getParts(message.attributes.struct);
       const cids = await this.getContentIds(connection, message, parts);
       const imageParts = this.getImageParts(parts);
@@ -74,7 +77,7 @@ export class DownloadCommand extends BaseCommand {
     await connection.closeBox(false);
   }
 
-  private async getContentIds(connection: ImapSimple, message: any, parts: any[]) {
+  private async getContentIds(connection: ImapSimple, message: Message, parts: any[]) {
     const part = this.getHtmlPart(parts);
     const html = await connection.getPartData(message, part);
 
