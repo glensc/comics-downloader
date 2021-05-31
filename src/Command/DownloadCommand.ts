@@ -158,6 +158,9 @@ export class DownloadCommand extends BaseCommand {
       filename = filename.replace(`M\u{FFFD}rakarud`, "Mürakarud");
     }
 
+    // Mojibake fix
+    filename = filename.replace(/Ã¼/g, "ü");
+
     // Shorten
     filename = filename.replace("Cyanide and Happiness, a daily webcomic", "Cyanide and Happiness");
 
